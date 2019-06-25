@@ -7,9 +7,11 @@
             [amazonica.core :as aws]
             [amazonica.aws.s3transfer :as s3transfer]
             [amazonica.aws.ec2 :as ec2])
-  (:import [org.apache.spark.streaming.api.java JavaStreamingContext JavaDStream]
-           org.apache.spark.SparkContext
-           [org.apache.spark.streaming StreamingContext Duration]))
+  (:gen-class)
+  ;; (:import [org.apache.spark.streaming.api.java JavaStreamingContext JavaDStream]
+  ;;          org.apache.spark.SparkContext
+  ;;          [org.apache.spark.streaming StreamingContext Duration] )
+  )
 
 ;;Change these to (System/getProperty access-key)
 (def aws-cred {:access-key (env :aws-access-key)
