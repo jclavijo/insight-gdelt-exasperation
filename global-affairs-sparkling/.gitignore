@@ -10,3 +10,9 @@ pom.xml.asc
 /.nrepl-port
 .hgignore
 .hg/
+.lein-env
+.DS_Store
+aws.conf
+.gitignore
+/resources/.DS_Store
+demoApplication.log

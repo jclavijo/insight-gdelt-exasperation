@@ -1,6 +1,6 @@
-(ns scala-exasperate.core-test
+(ns global-affairs-sparkling.core-test
   (:require [clojure.test :refer :all]
-            [scala-exasperate.core :refer :all]))
+            [global-affairs-sparkling.core :refer :all]))
 
 (deftest a-test
   (testing "FIXME, I fail."
