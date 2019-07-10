@@ -1,7 +1,7 @@
 /target
 /classes
 /checkouts
-profiles.clj
+profile.clj
 pom.xml
 pom.xml.asc
 *.jar
@@ -12,8 +12,6 @@ pom.xml.asc
 .hg/
 .lein-env
 .DS_Store
-aws.conf
 .gitignore
 /resources/.DS_Store
 demoApplication.log
-s3.properties 
