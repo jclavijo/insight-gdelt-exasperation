@@ -16,3 +16,4 @@ aws.conf
 .gitignore
 /resources/.DS_Store
 demoApplication.log
+s3.properties 
