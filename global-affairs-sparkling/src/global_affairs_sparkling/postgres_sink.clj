@@ -1,15 +1,30 @@
 (ns global-affairs-sparkling.postgres-sink
   (:require [clojure.java.jdbc :as jdbc]
             [environ.core :refer [env]]
+            [clojure.data.csv :as csv]
+            [clojure.jdbc-c3p0 :as c3p0]
+            ;(:import [com.mchange/c3p0 "0.9.5.2"]);using native
 ))
 
-;; (def db-pg-spec {:dbtype "postgresql"
-;;             :dbname "mypgdatabase" ;(env :db-name )
-;;             :host "mydb.server.com" ;(env :host-url)
-;;             :user "myuser" ; (env :db-user)
-;;             :password "secret" ; (env :db-password)
-;;             :ssl true
-;;             :sslfactory "org.postgresql.ssl.NonValidatingFactory"})
+(def pg-db-spec {:dbtype     "postgresql"
+                 :dbname     "global-affairs";(env :db-name)
+                 :host       "mydb.server.com";(env :db-host-url)
+                 :user       "-";(env :db-user)
+                 :password   "-";(env :db-password)
+                 :ssl true
+                 ;;using aws security and node only to connect to db
+                 :sslfactory "org.postgresql.ssl.NonValidatingFactory"})
+
+(defn db-insert
+  [table-matrix]
+  (jdbc/insert-multi! db-spec :DATE_NATION_EVENTS
+                      nil ; column names not supplied
+                      table-matrix
+                      ;; [[1 "Apple" "red" 59 87]
+                      ;;  [2 "Banana" "yellow" 29 92.2]
+                      ;;  [3 "Peach" "fuzzy" 139 90.0]
+                      ;;  [4 "Orange" "juicy" 89 88.6]]
+                      ))
 
 ;; ;; pg-db instead of db-pg-spec
 ;; (jdbc/insert! db-pg-spec :table {:col1 42 :col2 "123"})               ;; Create
@@ -18,10 +33,7 @@
 ;; (jdbc/delete! db-pg-spec :table ["id = ?" 13])                        ;; Delete
 
 
-                                        ;(jdbc/insert!)
-
-                                        ;[com.mchange/c3p0 "0.9.5.2"]
-;; (ns example.db
+;; c3p0 example
 ;;   (:import (com.mchange.v2.c3p0 ComboPooledDataSource)))
 ;; (defn pool
 ;;   [spec]
@@ -38,3 +50,4 @@
 ;; (def pooled-db (delay (pool db-spec)))
 
 ;; (defn db-connection [] @pooled-db)
+
