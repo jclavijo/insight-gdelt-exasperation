@@ -1,53 +1,55 @@
 (ns global-affairs-sparkling.postgres-sink
-  (:require [clojure.java.jdbc :as jdbc]
+  (:require [next.jdbc :as jdbc]
+            [next.jdbc.sql :as sql]
             [environ.core :refer [env]]
             [clojure.data.csv :as csv]
-            [clojure.jdbc-c3p0 :as c3p0]
-            ;(:import [com.mchange/c3p0 "0.9.5.2"]);using native
-))
+            [clj-time.core :as time]
+            ;[clj-time.jdbc :as t-jdbc]
+            [clj-time.coerce :as t-coerce]
+            ))
 
-(def pg-db-spec {:dbtype     "postgresql"
-                 :dbname     "global-affairs";(env :db-name)
-                 :host       "mydb.server.com";(env :db-host-url)
-                 :user       "-";(env :db-user)
-                 :password   "-";(env :db-password)
+
+(def pg-db-spec {:dbtype      "postgresql"
+                 :classname   "org.postgresql.Driver"
+                 :dbname      (env :db-name)
+                 :host        (env :db-host-url)
+                 :user        (env :db-user)
+                 :password    (env :db-password)
                  :ssl true
                  ;;using aws security and node only to connect to db
                  :sslfactory "org.postgresql.ssl.NonValidatingFactory"})
 
+(def pg-datasource (jdbc/get-datasource pg-db-spec))
+
+(def date-nation-event-structure
+  [:datec1c2ecid
+   :dates
+   :country_name1
+   :country_name2
+   :event_code
+   :event_name
+   :event_code_count])
+
 (defn db-insert
-  [table-matrix]
-  (jdbc/insert-multi! db-spec :DATE_NATION_EVENTS
-                      nil ; column names not supplied
-                      table-matrix
-                      ;; [[1 "Apple" "red" 59 87]
-                      ;;  [2 "Banana" "yellow" 29 92.2]
-                      ;;  [3 "Peach" "fuzzy" 139 90.0]
-                      ;;  [4 "Orange" "juicy" 89 88.6]]
-                      ))
+  [datasource table table-structure table-matrix]
+  (sql/insert-multi! datasource
+                     table ;:date_nation_events
+                     table-structure 
+                     table-matrix))
 
-;; ;; pg-db instead of db-pg-spec
-;; (jdbc/insert! db-pg-spec :table {:col1 42 :col2 "123"})               ;; Create
-;; (jdbc/query   db-pg-spec ["SELECT * FROM table WHERE id = ?" 13])     ;; Read
-;; (jdbc/update! db-pg-spec :table {:col1 77 :col2 "456"} ["id = ?" 13]) ;; Update
-;; (jdbc/delete! db-pg-spec :table ["id = ?" 13])                        ;; Delete
+(def dne-table-insert
+  #(db-insert pg-datasource (env :db-table-name) date-nation-event-structure %))
 
+(defn insert-row
+  [db-source table table-matrix id] 
+  (sql/insert! db-source
+               table {:datec1c2ecID id
+                      :dates (t-coerce/to-sql-date "2000-12-31")
+                      :country_name1 "United States"
+                      :country_name2 "Canada"
+                      :event_code "0213"
+                      :event_name "War what is it good for?"
+                      :event_code_count 10
+}))
 
-;; c3p0 example
-;;   (:import (com.mchange.v2.c3p0 ComboPooledDataSource)))
-;; (defn pool
-;;   [spec]
-;;   (let [cpds (doto (ComboPooledDataSource.)
-;;                (.setDriverClass (:classname spec))
-;;                (.setJdbcUrl (str "jdbc:" (:subprotocol spec) ":" (:subname spec)))
-;;                (.setUser (:user spec))
-;;                (.setPassword (:password spec))
-;;                ;; expire excess connections after 30 minutes of inactivity:
-;;                (.setMaxIdleTimeExcessConnections (* 30 60))
-;;                ;; expire connections after 3 hours of inactivity:
-;;                (.setMaxIdleTime (* 3 60 60)))]
-;;     {:datasource cpds}))
-;; (def pooled-db (delay (pool db-spec)))
-
-;; (defn db-connection [] @pooled-db)
-
+;(insert-row pg-datasource :dne_test date-nation-event-structure (rand-int 1000))

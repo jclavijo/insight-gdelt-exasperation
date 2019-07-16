@@ -8,13 +8,14 @@
                  [gorillalabs/sparkling "2.1.4"]
                  [org.clojure/tools.logging "0.4.0"]
                  [org.slf4j/slf4j-log4j12 "1.7.1"]
-                 [org.clojure/java.jdbc "0.7.9"]
                  [org.clojure/data.csv "0.1.4"]
-                 [clojure.jdbc/clojure.jdbc-c3p0 "0.3.3"]
-                 ;[amazonica "0.3.143" :eclusions [com.fasterxml.jackson.core/jackson-annotations com.amazonaws/aws-java-sdk-signer com.amazonaws/aws-java-sdk-dlm com.fasterxml.jackson.core/jackson-core]]
-                 ;[org.apache.spark/spark-core_2.10 "2.1.0"]
-                 ;[org.apache.spark/spark-sql_2.10 "2.1.0"]
-                 ;[org.apache.spark/spark-streaming_2.11 "2.3.1"]
+                 [clj-time "0.15.0"]
+                 [seancorfield/next.jdbc "1.0.1"]
+                 [org.postgresql/postgresql "42.1.4"]
+                 ;;[amazonica "0.3.143" :eclusions [com.fasterxml.jackson.core/jackson-annotations com.amazonaws/aws-java-sdk-signer com.amazonaws/aws-java-sdk-dlm com.fasterxml.jackson.core/jackson-core]]
+                 ;;[org.apache.spark/spark-core_2.10 "2.1.0"]
+                 ;;[org.apache.spark/spark-sql_2.10 "2.1.0"]
+                 ;;[org.apache.spark/spark-streaming_2.11 "2.3.1"]
                  [log4j/log4j "1.2.17" :exclusions [javax.mail/mail
                                                     javax.jms/jms
                                                     com.sun.jmdk/jmxtools
@@ -33,9 +34,9 @@
              :test [:project/test :profiles/test]
              :profiles/dev  {}
              :profiles/test {}
-             :project/dev {:dependencies [[com.billpiel/sayid "0.0.17"]]
+             :project/dev {:dependencies [[alembic "0.3.2"]
+                                          [com.billpiel/sayid "0.0.17"]]
                            :plugins [[lein-cljfmt "0.6.0"]
-                                     ;[lein-dotenv "RELEASE"]
                                      [lein-environ "1.1.0"]
                                      [lein-auto "0.1.3"]]}
              :project/test {:dependencies [[com.billpiel/sayid "0.0.17"]]}
