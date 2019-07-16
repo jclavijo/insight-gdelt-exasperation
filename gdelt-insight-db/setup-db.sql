@@ -1,0 +1,7 @@
+
+GRANT CONNECT ON DATABASE gdelt TO gdelt;
+ALTER TABLE date_nation_events SET SCHEMA global_affairs;
+ALTER TABLE dne_test SET SCHEMA global_affairs;
+GRANT SELECT, INSERT, UPDATE, DELETE ON ALL TABLES IN SCHEMA global_affairs TO gdelt;
+GRANT ALL PRIVILEGES ON ALL TABLES IN SCHEMA global_affairs TO gdelt;
+GRANT ALL PRIVILEGES ON ALL SEQUENCES IN SCHEMA global_affairs TO gdelt;
