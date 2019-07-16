@@ -73,6 +73,7 @@
   [line]
   (string/split line #"\t"))
 
+
 (def g-columns-to-get ["MonthYear"
                        "Actor1CountryCode"
                        "Actor2CountryCode"
@@ -134,15 +135,15 @@
        (do-these-tags-exist-in-row? row [:ac1 :gc2]) (vals-of-selected-keys [:ac1 :gc2])
 
        (do-these-tags-exist-in-row? row [:gc1 :ac2]) (vals-of-selected-keys [:gc1 :ac2])
-       (do-these-tags-exist-in-row? row [:gc1 :gc2]) (vals-of-selected-keys  [:gc1 :gc2])
+       (do-these-tags-exist-in-row? row [:gc1 :gc2]) (vals-of-selected-keys [:gc1 :gc2])
 
-       (do-these-tags-exist-in-row? row [:gc1 :egc]) (vals-of-selected-keys  [:gc1 :egc])
-       (do-these-tags-exist-in-row? row [:ac1 :egc]) (vals-of-selected-keys  [:ac1 :egc])
+       (do-these-tags-exist-in-row? row [:gc1 :egc]) (vals-of-selected-keys [:gc1 :egc])
+       (do-these-tags-exist-in-row? row [:ac1 :egc]) (vals-of-selected-keys [:ac1 :egc])
 
-       (do-these-tags-exist-in-row? row [:gc2 :egc]) (vals-of-selected-keys  [:gc2 :egc])
-       (do-these-tags-exist-in-row? row [:ac2 :egc]) (vals-of-selected-keys  [:ac2 :egc])
+       (do-these-tags-exist-in-row? row [:gc2 :egc]) (vals-of-selected-keys [:gc2 :egc])
+       (do-these-tags-exist-in-row? row [:ac2 :egc]) (vals-of-selected-keys [:ac2 :egc])
                                         ;no country codes found
-       :else nil))
+       :else (vals-of-selected-keys  [:egc :egc])))
    ))
 
 ;;;TEST-------------------
@@ -154,13 +155,20 @@
                                      get-national-codes
                                      (map keyword)))
 
+(defn country-codes-to-str
+  [code-vector]
+  (if (not-any? nil? code-vector)
+    (map name code-vector)
+    ["null" "null"]
+    ))
+
 ;;expand data to create new keys from column header and values to aggregate adding one count
 
 (defn mk-datecountryevent-key
   "returns a string key concatenated from date country_code1 country_code2, and event_code. Expects a map of the values from row and a vector of two country codes"
   [{:keys [date ec] :as row}  countries-code-vector]
-  (let [countries (map name countries-code-vector)
-        key-date-co-code (flatten [date (map name countries-code-vector) ec])]
+  (let [countries (country-codes-to-str countries-code-vector)
+        key-date-co-code (flatten [date countries ec])]
     (apply str key-date-co-code)))
 
 ;; (defn get-row-data
@@ -179,11 +187,6 @@
         column-map (tag-gdelt-columns selected-columns)
         relationship-key (mk-datecountryevent-key column-map national-codes)]
     (spark/tuple relationship-key 1)))
-
-;; (spark/map-to-pair
-;;  (fn [[_ _ total _ :as row]]
-;;    (spark/tuple total row)))
-
 
 
 
