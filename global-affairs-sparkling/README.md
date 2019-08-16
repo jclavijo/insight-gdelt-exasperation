@@ -1,10 +1,13 @@
 # global-affairs-sparkling
 
-A Clojure library designed to ... well, that part is up to you.
+Is the processing pipeline, that usese Sparkling, Clojure and the Spark engine to process the GDELT dataset
 
 ## Usage
 
-FIXME
+Setup is required of the spark cluster on EC2
+Configuration files are also necesary.
+Download and run with the run-spark.sh
+
 
 ## License
 
