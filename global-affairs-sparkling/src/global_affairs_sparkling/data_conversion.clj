@@ -234,10 +234,10 @@
    :TV	"Tuvalu"		:TUV	:TV
    :UG	"Uganda"		:UGA	:UG
    :UA	"Ukraine"		:UKR	:UA
-   :AE	"United Arab Emirates (the)"		:ARE	:AE
-   :GB	"United Kingdom of Great Britain and Northern Ireland (the)"		:GBR	:GB
-   :UM	"United States Minor Outlying Islands (the)"		:UMI	:UM
-   :US	"United States of America (the)"		:USA	:US
+   :AE	"United Arab Emirates"		:ARE	:AE
+   :GB	"United Kingdom of Great Britain and Northern Ireland"		:GBR	:GB
+   :UM	"United States Minor Outlying Islands"		:UMI	:UM
+   :US	"United States of America"		:USA	:US
    :UY	"Uruguay"		:URY	:UY
    :UZ	"Uzbekistan"		:UZB	:UZ
    :VU	"Vanuatu"		:VUT	:VU
@@ -252,6 +252,7 @@
    :ZW	"Zimbabwe"		:ZWE	:ZW
    :AX	"Aland Islands"		:ALA	:AX})
 
+;;https://github.com/openeventdata/text_to_CAMEO/blob/master/CAMEO_codefile.txt
 (def gdelt-columns-hashmap
   {"GLOBALEVENTID" 0
    "SQLDATE" 1
@@ -315,8 +316,8 @@
    "DATEADDED" 59
    "SOURCEURL" 60})
 
-(def event-codes
-  {
+(def event-codes-hashmap
+  {:01 "Statement about"
    :010	"Make statement"
    :011	"Decline comment"
    :012	"Make pessimistic comment"

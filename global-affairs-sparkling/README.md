@@ -8,10 +8,10 @@ Setup is required of the spark cluster on EC2
 Configuration files are also necesary.
 Download and run with the run-spark.sh
 
+https://registry.opendata.aws/gdelt/
+http://data.gdeltproject.org/documentation/GDELT-Event_Codebook-V2.0.pdf
 
 ## License
-
-Copyright © 2019 FIXME
 
 This program and the accompanying materials are made available under the
 terms of the Eclipse Public License 2.0 which is available at

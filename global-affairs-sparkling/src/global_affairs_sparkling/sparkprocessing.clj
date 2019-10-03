@@ -6,15 +6,17 @@
             [environ.core :refer [env]]
             [clojure.string :as string]
             [sparkling.utils :as utils]
-            [clj-time.core :as time]
-            [clj-time.coerce :as t-coerce]))
+            [java-time :as j-time]
+           ; [clj-time.core :as time]
+           ; [clj-time.jdbc]
+            [clojure.java.jdbc]
+           ; [clj-time.format :as t-format]
+            ;; [clj-time.coerce :as t-coerce]
+            ))
 
 (def aws-cred {:access-key (env :aws-access-key)
                :secret-key (env :aws-secret-key)
                :endpoint   (env :aws-endpoint)})
-(def local-ip (env :spark-local-ip))
-(def master-url "local")
-
 
 ;;https://stackoverflow.com/questions/47528322/failed-to-register-classes-with-kryo
 ;; AOT compilation of deseralization is required because some of the dependencies this could also potentially solve it
@@ -26,11 +28,11 @@
 (defn convert-country-code
   "returns a conversion of the country_code_key: passed. A 2-char key returns the string name of the country. A three-char-key: returns a 2-char-key:"
   [code]
-  (get convert/country-codes-hashmap code))
+  (get convert/country-codes-hashmap (keyword code) code))
 
-(defn convert-event-code
+(defn get-event-name
   [code-string]
-  (get convert/country-codes-hashmap (keyword code-string)))
+  (get convert/event-codes-hashmap (keyword code-string) code-string))
 
 (defn csv-line-to-vector
   "Retuns a string vector converting the tab delimited string passed"
@@ -57,7 +59,7 @@
                      (set))]
        (keep-indexed (fn [i v] (if (indices i) v)) row-line)))
 
-;;Returns 
+;;Returns the values that match the column names provided based on the columns-hashmap passed. 
 (def get-columns #(get-columns-from-line convert/gdelt-columns-hashmap g-columns-to-get  %))
 
 ;;Returns a map of the rows of data with their corresponding assigned keys
@@ -68,10 +70,7 @@
   "Returns a matching country code or country names, takes a vector of country code strings"
   [two-nation-codes]
   (map #(if (and (= 3 (count %)) (not (nil? %))) 
-          (-> %
-              keyword
-              convert-country-code
-              )
+          (convert-country-code %)
           (keyword %))
        two-nation-codes))
 
@@ -118,15 +117,32 @@
 (defn flatten-event-code
   "Returns a max 3 digit code if 4"
   [code]
-  (if (= 5 (count code))
-    (subs code 0 3)
+  (if (>= (count code) 3)
+    (subs code 0 2)
     code))
 
+;;(def time-formatter (t-format/formatter "YYYYMM"))
+
+(defn to-date
+  "Returns a sql date value from a YYYYMM string"
+  [date]
+  (if (some? date)
+    (j-time/sql-date (Integer/parseInt (subs date 0 4)) (Integer/parseInt (subs date 4)))
+    ;;(t-coerce/to-sql-date (t-format/parse time-formatter date))
+    date))
+;; (defn to-date
+;;   "Returns a sql date value from a YYYYMM string"
+;;   [date]
+;;   (if (some? date)
+;;     (t-coerce/to-sql-date 
+;;      (str (subs date 0 4) "-" (subs date 4)))
+;;     date))
+ 
 (defn mk-datecountryevent-key
   "returns a string key concatenated from date country_code1 country_code2, and event_code. Expects a map of the values from row and a vector of two country codes"
   [{:keys [date ec] :as row}  countries-code-vector]
   (let [countries (country-codes-to-str countries-code-vector)
-        key-date-co-code (flatten [date countries (flatten-event-code ec)])]
+        key-date-co-code (flatten [date countries  ec])];;flatten-event-code ec
     (clojure.string/join "_" key-date-co-code)))
 
 
@@ -139,7 +155,10 @@
         national-codes (get-national-codes selected-columns)
         column-map (tag-gdelt-columns selected-columns)
         relationship-key (mk-datecountryevent-key column-map national-codes)]
-    (spark/tuple relationship-key 1)))
+    (if (some some? national-codes)
+      (spark/tuple relationship-key 1))))
+
+
 
 (defn convert-key-code-vector
   "Returns a vector of strings from the id string passed and converts it for insert in table"
@@ -147,9 +166,9 @@
   (let [id-string-vector (clojure.string/split id-string #"_")
         [date country-code1 country-code2 event-code] id-string-vector]
     [id-string
-     (t-coerce/to-sql-date date)
-     (convert-country-code (keyword country-code1))
-     (convert-country-code (keyword country-code2))
-     event-code ;(flatten-event-code event-code)
-     (convert-event-code event-code)
+     (to-date date);;YYYY-MM
+     (convert-country-code country-code1)
+     (convert-country-code country-code2)
+     (flatten-event-code event-code)
+     (get-event-name event-code)
      summed-val]))
